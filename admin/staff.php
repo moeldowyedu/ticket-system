@@ -505,27 +505,50 @@ if ($qry->num_rows > 0) {
                     const queueNoCell = document.createElement('td');
                     queueNoCell.textContent = queueNo;
 
-                    // Type / status cell - show A/B marker if present, otherwise show status type
+                    // Type / status cell - show A/B marker as colored badges (no hyphens) if present, otherwise show status type
                     const typeIdCell = document.createElement('td');
-                    // Determine display priority: explicit selection (A/B) -> raw status (e.g. '-A-') -> status type name
-                    let displayValue = '';
+
+                    // Determine selection markers from explicit selection or from status_raw
+                    let selectionMarker = '';
                     if (info.selection) {
-                        // selection is stored as 'A' or 'B' in the selection column
-                        displayValue = '-' + info.selection + '-';
-                    } else if (info.status_raw && typeof info.status_raw === 'string' && info.status_raw.indexOf('-') === 0) {
-                        // status_raw may contain '-A-' or '-B-'
-                        displayValue = info.status_raw;
-                    } else {
-                        displayValue = typeId || '';
+                        selectionMarker = info.selection; // 'A' or 'B'
+                    } else if (info.status_raw && typeof info.status_raw === 'string') {
+                        // attempt to parse '-A-' or '-B-' or combined
+                        if (info.status_raw.indexOf('A') !== -1) selectionMarker += (selectionMarker ? ' و ' : '') + 'A';
+                        if (info.status_raw.indexOf('B') !== -1) selectionMarker += (selectionMarker ? ' و ' : '') + 'B';
                     }
 
-                    typeIdCell.textContent = displayValue;
-                    if (typeColor) {
-                        typeIdCell.style.backgroundColor = typeColor;
-                        typeIdCell.style.color = getContrastColor(typeColor);
-                        typeIdCell.style.padding = '5px';
-                        typeIdCell.style.borderRadius = '3px';
+                    if (selectionMarker) {
+                        // Render badges for A and/or B
+                        const parts = selectionMarker.split(' و ');
+                        let badges = '';
+                        parts.forEach(function(m) {
+                            if (m === 'A') {
+                                badges += '<span style="display:inline-block;padding:4px 10px;margin:0 4px;background:#28a745;color:' + getContrastColor('#28a745') + ';border-radius:5px;font-weight:800;">A</span>';
+                            } else if (m === 'B') {
+                                badges += '<span style="display:inline-block;padding:4px 10px;margin:0 4px;background:#dc3545;color:' + getContrastColor('#dc3545') + ';border-radius:5px;font-weight:800;">B</span>';
+                            } else {
+                                badges += '<span style="display:inline-block;padding:3px 8px;margin:0 4px;background:#e9ecef;color:#212529;border-radius:4px;">' + m + '</span>';
+                            }
+                        });
+
+                        if (typeId) {
+                            typeIdCell.innerHTML = '<div>' + typeId + '</div><div style="margin-top:4px">' + badges + '</div>';
+                        } else {
+                            typeIdCell.innerHTML = badges;
+                        }
                         typeIdCell.style.textAlign = 'center';
+                        typeIdCell.style.padding = '6px';
+                    } else {
+                        // No selection markers, fallback to showing status type name with its color if provided
+                        typeIdCell.textContent = typeId || '';
+                        if (typeColor) {
+                            typeIdCell.style.backgroundColor = typeColor;
+                            typeIdCell.style.color = getContrastColor(typeColor);
+                            typeIdCell.style.padding = '5px';
+                            typeIdCell.style.borderRadius = '3px';
+                            typeIdCell.style.textAlign = 'center';
+                        }
                     }
 
                     const timeCell = document.createElement('td');
