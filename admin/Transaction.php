@@ -77,6 +77,20 @@ class Transaction
             exit;
         }
 
+        /* Only include show_ab_selection if the column exists in the database
+           This avoids SQL errors on installations that don't have the new column. */
+        $colExists = false;
+        $res = $this->db->query("SHOW COLUMNS FROM transactions LIKE 'show_ab_selection'");
+        if ($res && $res->num_rows > 0) {
+            $colExists = true;
+        }
+
+        if ($colExists) {
+            $data .= ", show_ab_selection = ? ";
+            $params[] = isset($show_ab_selection) ? 'on' : 'off';
+            $types .= "s";
+        }
+
         if (empty($id)) {
             $stmt = $this->db->prepare("INSERT INTO transactions SET " . $data);
             $stmt->bind_param($types, ...$params);
@@ -89,6 +103,10 @@ class Transaction
         }
 
         if ($stmt->execute()) {
+            // If we inserted a new record (no id provided), return the new insert id
+            if (empty($id)) {
+                return $this->db->insert_id;
+            }
             return 1;
         }
     }
@@ -121,5 +139,32 @@ class Transaction
             }
         }
         return 5;
+    }
+
+    /**
+     * AJAX handler to update only the show_ab_selection flag for a transaction.
+     * Expects POST: id (int), value ('on'|'off')
+     */
+    public function update_show_ab_selection()
+    {
+        extract($_POST);
+        if (!isset($id)) return 0;
+
+        // Ensure column exists before updating
+        $res = $this->db->query("SHOW COLUMNS FROM transactions LIKE 'show_ab_selection'");
+        if (!($res && $res->num_rows > 0)) {
+            // Try to create the column automatically
+            $alter = $this->db->query("ALTER TABLE transactions ADD COLUMN show_ab_selection ENUM('on','off') DEFAULT 'off'");
+            if (!$alter) {
+                // Could not create column (permissions or other error)
+                return 0;
+            }
+        }
+
+        $val = (isset($value) && $value === 'on') ? 'on' : 'off';
+        $stmt = $this->db->prepare("UPDATE transactions SET show_ab_selection = ? WHERE id = ?");
+        $stmt->bind_param('si', $val, $id);
+        if ($stmt->execute()) return 1;
+        return 0;
     }
 }

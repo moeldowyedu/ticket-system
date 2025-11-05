@@ -122,8 +122,9 @@
                                 <input type="checkbox" class="chk_box" name="priority">
                                 <span class="slider round"></span>
                             </label>
-                            <span class="ml-2"><?= tr('priority') ?></span>
+                           <span class="ml-2"><?= tr('priority') ?></span>
                         </div>
+                     
                     </div>
 
                     <div class="card-footer">
@@ -152,6 +153,7 @@
                                 <th class="text-center"><?= tr('symbol') ?></th>
                                 <th class="text-center"><?= tr('numberFrom') ?></th>
                                 <th class="text-center"><?= tr('numberTo') ?></th>
+                                <th class="text-center">A/B Selection</th>
                                 <th class="text-center"><?= tr('options') ?></th>
                             </tr>
                         </thead>
@@ -191,6 +193,12 @@
                                     <td class="text-center">
                                         <?php echo $row['numberTo'] ?>
                                     </td>
+                                    <td class="text-center">
+                                        <label class="switch" style="margin:0 auto;">
+                                            <input type="checkbox" class="show-ab-switch" data-id="<?php echo $row['id'] ?>" <?php echo (isset($row['show_ab_selection']) && $row['show_ab_selection'] === 'on') ? 'checked' : '' ?> />
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </td>
                                     <td class="text-center w-50">
                                         <button class="btn btn-sm btn-primary edit_transaction" type="button"
                                             data-id="<?php echo $row['id'] ?>"
@@ -199,7 +207,8 @@
                                             data-symbol="<?php echo $row['symbol'] ?>"
                                             data-numberFrom="<?php echo $row['numberFrom'] ?>"
                                             data-numberTo="<?php echo $row['numberTo'] ?>"
-                                            data-type="<?php echo $row['type'] ?>">
+                                            data-type="<?php echo $row['type'] ?>"
+                                            data-show-ab="<?php echo isset($row['show_ab_selection']) ? $row['show_ab_selection'] : 'off' ?>">
                                             <?= tr('edit') ?>
                                         </button>
                                         <?php if ($row['active'] == 'on') : ?>
@@ -249,7 +258,9 @@
             method: 'POST',
             type: 'POST',
             success: function(resp) {
-                if (resp == 1) {
+                // Treat any positive numeric response as success (insert returns new id, update returns 1)
+                var num = parseInt(resp);
+                if (num > 0) {
                     alert_toast("Data successfully added", 'success')
                     setTimeout(function() {
                         location.reload()
@@ -291,7 +302,50 @@
         } else {
             cat.find("[name='priority']").prop('checked', false);
         }
+        if ($(this).attr('data-show-ab') == 'on') {
+            cat.find("[name='show_ab_selection']").prop('checked', true);
+        } else {
+            cat.find("[name='show_ab_selection']").prop('checked', false);
+        }
         end_load()
+    })
+
+    // Auto-save show_ab_selection when toggled for an existing transaction
+    $(document).on('change', '[name="show_ab_selection"]', function() {
+        var id = $('[name="id"]').val();
+        var chk = $(this);
+        if (!id) {
+            // No id yet — user is creating a new transaction. Auto-submit the form to create it,
+            // so the show_ab_selection value will be persisted as part of the new record.
+            alert_toast('Saving transaction... Please wait', 'info');
+            // Trigger the existing save handler which will submit the form via AJAX and reload on success
+            $('#manage-transaction').submit();
+            return;
+        }
+
+        var val = chk.is(':checked') ? 'on' : 'off';
+        start_load();
+        $.ajax({
+            url: 'ajax.php?action=update_show_ab_selection',
+            method: 'POST',
+            data: { id: id, value: val },
+            success: function(resp) {
+                end_load();
+                if (resp == 1) {
+                    alert_toast('A/B selection setting saved', 'success');
+                    // Also update the row display if present
+                    var rowBtn = $('.edit_transaction[data-id="' + id + '"]');
+                    if (rowBtn.length) rowBtn.attr('data-show-ab', val);
+                    // Optionally reload table or page if you want full refresh
+                } else {
+                    alert_toast('Unable to save setting', 'error');
+                }
+            },
+            error: function() {
+                end_load();
+                alert_toast('AJAX Error while saving', 'error');
+            }
+        })
     })
 
     $('.delete_transaction').click(function() {
@@ -350,4 +404,35 @@
             }
         })
     }
+
+    // Per-row A/B switch: auto-save when toggled in the table (outside the edit box)
+    $(document).on('change', '.show-ab-switch', function() {
+        var chk = $(this);
+        var id = chk.attr('data-id');
+        var val = chk.is(':checked') ? 'on' : 'off';
+        start_load();
+        $.ajax({
+            url: 'ajax.php?action=update_show_ab_selection',
+            method: 'POST',
+            data: { id: id, value: val },
+            success: function(resp) {
+                end_load();
+                if (resp == 1) {
+                    alert_toast('A/B selection saved', 'success');
+                    // update corresponding edit button data attribute so edit modal uses correct value
+                    var btn = $('.edit_transaction[data-id="' + id + '"]');
+                    if (btn.length) btn.attr('data-show-ab', val);
+                } else {
+                    alert_toast('Unable to save A/B setting', 'error');
+                    // revert checkbox visually
+                    chk.prop('checked', !chk.is(':checked'));
+                }
+            },
+            error: function() {
+                end_load();
+                alert_toast('AJAX error while saving', 'error');
+                chk.prop('checked', !chk.is(':checked'));
+            }
+        })
+    })
 </script>
