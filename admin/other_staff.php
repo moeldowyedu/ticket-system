@@ -505,13 +505,54 @@ if ($qry->num_rows > 0) {
                     queueNoCell.textContent = queueNo;
 
                     const typeIdCell = document.createElement('td');
-                    typeIdCell.textContent = typeId;
-                    if (typeColor) {
-                        typeIdCell.style.backgroundColor = typeColor;
-                        typeIdCell.style.color = getContrastColor(typeColor);
-                        typeIdCell.style.padding = '5px';
-                        typeIdCell.style.borderRadius = '3px';
+
+                    // Prefer human-friendly status text from server: info.type (status name)
+                    // but also show selection/status markers (A/B) if present in the response.
+                    let displayType = '';
+                    if (typeId) displayType = typeId;
+
+                    // selection is a dedicated column (A or B). status_raw may contain markers like "-A-" or "-B-".
+                    let selectionMarker = '';
+                    if (info.selection) {
+                        selectionMarker = info.selection;
+                    } else if (info.status_raw) {
+                        // extract letters A or B if present
+                        if (info.status_raw.indexOf('A') !== -1) selectionMarker += (selectionMarker ? ' و ' : '') + 'A';
+                        if (info.status_raw.indexOf('B') !== -1) selectionMarker += (selectionMarker ? ' و ' : '') + 'B';
+                    }
+
+                    if (selectionMarker) {
+                        // When selection markers (A/B) are present, show them as colored badges.
+                        // A => #28a745, B => #dc3545. If both are present show both badges.
+                        const parts = selectionMarker.split(' و ');
+                        let badges = '';
+                        parts.forEach(function(m) {
+                            if (m === 'A') {
+                                badges += '<span style="display:inline-block;padding:3px 8px;margin:0 4px;background:#28a745;color:' + getContrastColor('#28a745') + ';border-radius:4px;font-weight:700;">A</span>';
+                            } else if (m === 'B') {
+                                badges += '<span style="display:inline-block;padding:3px 8px;margin:0 4px;background:#dc3545;color:' + getContrastColor('#dc3545') + ';border-radius:4px;font-weight:700;">B</span>';
+                            } else {
+                                badges += '<span style="display:inline-block;padding:3px 8px;margin:0 4px;background:#e9ecef;color:#212529;border-radius:4px;">' + m + '</span>';
+                            }
+                        });
+
+                        if (displayType) {
+                            typeIdCell.innerHTML = '<div>' + displayType + '</div><div style="margin-top:4px">' + badges + '</div>';
+                        } else {
+                            typeIdCell.innerHTML = badges;
+                        }
                         typeIdCell.style.textAlign = 'center';
+                        typeIdCell.style.padding = '6px';
+                    } else {
+                        typeIdCell.textContent = displayType;
+
+                        if (typeColor) {
+                            typeIdCell.style.backgroundColor = typeColor;
+                            typeIdCell.style.color = getContrastColor(typeColor);
+                            typeIdCell.style.padding = '5px';
+                            typeIdCell.style.borderRadius = '3px';
+                            typeIdCell.style.textAlign = 'center';
+                        }
                     }
 
                     const timeCell = document.createElement('td');
