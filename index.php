@@ -190,10 +190,12 @@
       }
     })
   }
-  window.show_modal = function($title = '', $url = '', $size = "") {
+  window.show_modal = function($title = '', $url = '', $size = "",$method='POST',$data={}) {
     start_load()
     $.ajax({
       url: $url,
+      method:$method,
+      data:$data,
       error: err => {
         console.log()
         alert("An error occured")

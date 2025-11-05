@@ -34,7 +34,7 @@
 	<div class="col-lg-12">
 		<div class="card first-card">
 			<div class="card-body">
-				<h3 class="text-center text-white"><b><?= isset($_SESSION['setting_name']) ? $_SESSION['setting_name'] : 'Transaction Queuing System'  ?></b> <a href="./admin/login.php"><button class="btn btn btn-secondary btn-sm" style="background: #2f4f4f; color: #fff;"><?= tr('login') ?></button></a></h3>
+				<h3 class="text-center text-white"><a href="./admin/login.php"><button class="btn btn btn-secondary btn-sm" style="background: #2f4f4f; color: #fff;"><?= tr('login') ?></button></a></h3>
 			</div>
 		</div>
 		<div class=" card second-card mt-4">

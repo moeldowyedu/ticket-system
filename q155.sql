@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 04, 2025 at 10:02 AM
+-- Generation Time: Nov 05, 2025 at 03:40 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -122,7 +122,7 @@ CREATE TABLE `settings` (
 --
 
 INSERT INTO `settings` (`id`, `password`, `name`, `image`, `ticket_company`, `ticket_logo`, `ticket_date`, `ticket_note`, `note`, `period`) VALUES
-(1, '$2y$10$seGQHo1zV69aHrMF5tMGye/8upyZnDQiIbERVrl2pj8yBtHW0D2Vi', ' ', '1750210560_98AA98AC998598B9-98B998B3998A98B1-98A7998498B598AD998A.webp', 'on', 'off', 'on', 'off', 'تفضل بالجلوس في قسم الإنتظار ,شاكرين صبرك ونتمنى لك الشفاء العاجل', 15);
+(1, '$2y$10$seGQHo1zV69aHrMF5tMGye/8upyZnDQiIbERVrl2pj8yBtHW0D2Vi', 'مستشفي خميس مشيط العام', '1728876900_WhatsApp Image 2023-01-01 at 6.40.13 AM.jpeg copy.jpg', 'on', 'off', 'on', 'off', 'تفضل بالجلوس في قسم الإنتظار ,شاكرين صبرك ونتمنى لك الشفاء العاجل', 15);
 
 -- --------------------------------------------------------
 
@@ -322,7 +322,39 @@ INSERT INTO `staff_statistics` (`id`, `staff_id`, `processed_at`) VALUES
 (179, 4, '2025-11-03 10:06:23'),
 (180, 4, '2025-11-03 10:08:05'),
 (181, 4, '2025-11-03 10:09:26'),
-(182, 5, '2025-11-03 16:28:18');
+(182, 5, '2025-11-03 16:28:18'),
+(183, 4, '2025-11-04 11:03:38'),
+(184, 5, '2025-11-04 11:06:36'),
+(185, 4, '2025-11-04 11:13:36'),
+(186, 5, '2025-11-04 11:16:32'),
+(187, 4, '2025-11-04 11:24:07'),
+(188, 4, '2025-11-04 11:27:47'),
+(189, 4, '2025-11-04 18:15:14'),
+(190, 5, '2025-11-04 18:16:46'),
+(191, 4, '2025-11-05 08:40:42'),
+(192, 4, '2025-11-05 09:49:33'),
+(193, 4, '2025-11-05 09:53:02'),
+(194, 4, '2025-11-05 09:57:05'),
+(195, 4, '2025-11-05 10:00:47'),
+(196, 4, '2025-11-05 10:06:28'),
+(197, 4, '2025-11-05 10:09:08'),
+(198, 4, '2025-11-05 10:10:34'),
+(199, 4, '2025-11-05 10:11:52'),
+(200, 4, '2025-11-05 10:13:02'),
+(201, 4, '2025-11-05 10:16:24'),
+(202, 4, '2025-11-05 10:43:17'),
+(203, 4, '2025-11-05 10:49:01'),
+(204, 4, '2025-11-05 10:51:34'),
+(205, 4, '2025-11-05 10:53:44'),
+(206, 4, '2025-11-05 10:55:25'),
+(207, 4, '2025-11-05 10:56:37'),
+(208, 4, '2025-11-05 10:59:43'),
+(209, 4, '2025-11-05 11:01:50'),
+(210, 4, '2025-11-05 11:03:48'),
+(211, 4, '2025-11-05 11:04:58'),
+(212, 4, '2025-11-05 11:06:26'),
+(213, 4, '2025-11-05 11:08:00'),
+(214, 4, '2025-11-05 11:11:30');
 
 -- --------------------------------------------------------
 
@@ -358,6 +390,7 @@ CREATE TABLE `transactions` (
   `sorting` enum('on','off') NOT NULL DEFAULT 'off',
   `active` enum('on','off') DEFAULT 'on',
   `priority` enum('on','off') NOT NULL,
+  `displayStatus` enum('on','off') NOT NULL DEFAULT 'off',
   `symbol` varchar(1) DEFAULT NULL,
   `numberFrom` int(11) NOT NULL DEFAULT 0,
   `numberTo` int(11) NOT NULL DEFAULT 0,
@@ -368,10 +401,10 @@ CREATE TABLE `transactions` (
 -- Dumping data for table `transactions`
 --
 
-INSERT INTO `transactions` (`id`, `name`, `status`, `sorting`, `active`, `priority`, `symbol`, `numberFrom`, `numberTo`, `type`) VALUES
-(1, 'عيادة الفرز', 1, 'off', 'on', 'off', 'A', 100, 199, 'sorting'),
-(14, 'عيادة الطبيب', 1, 'off', 'off', 'off', 'B', 200, 299, 'doctor'),
-(16, 'قسم الملاحظة', 1, 'off', 'off', 'off', '', 0, 0, 'notes');
+INSERT INTO `transactions` (`id`, `name`, `status`, `sorting`, `active`, `priority`, `displayStatus`, `symbol`, `numberFrom`, `numberTo`, `type`) VALUES
+(1, 'عيادة الفرز', 1, 'off', 'on', 'off', 'on', 'A', 100, 199, 'sorting'),
+(14, 'عيادة الطبيب', 1, 'off', 'on', 'off', 'off', 'B', 200, 299, 'doctor'),
+(16, 'قسم الملاحظة', 1, 'off', 'off', 'off', 'off', '', 0, 0, 'notes');
 
 -- --------------------------------------------------------
 
@@ -421,7 +454,7 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `name`, `window_id`, `type`, `transfer`, `username`, `password`) VALUES
 (1, 'Administrator', 0, 1, 'yes', 'admin', '$2y$10$8Lm7szkoAI77iKISxQlAGu9yvPSPTUUUX62454uWU/QLSAKORvlNG'),
-(4, 'عيادة الفرز 1', 1, 2, 'yes', 'ER1', '$2y$10$8Lm7szkoAI77iKISxQlAGu9yvPSPTUUUX62454uWU/QLSAKORvlNG'),
+(4, 'عيادة الفرز 1', 1, 2, 'yes', 'ER1', '$2y$10$7e5jZFXCdPQqeQrUr5GqheHJzy7zk7.qbLoEGUHQqK8adtQfXQ8XG'),
 (5, 'عيادة الطبيب 1', 19, 2, 'yes', 'ER3', '$2y$10$chFK2xvRPpjCTmaSDCGY8.jlHv4b0Cdc7gkLMZM0f7uRydLHp7Rqy'),
 (7, 'قسم الملاحظة A', 21, 2, 'no', 'ER5', '$2y$10$WY4TGY1lvnQ2w3DYKCai.OubI/lXXr2jd5Sr1M11Z02gBgnptjDMq'),
 (9, 'عيادة الفرز 2', 25, 2, 'no', 'er2', '$2y$10$viU2wej0xMkZb6WF.m01H.CBzk6y03Lb4Smmq3KarjGx40NKtYJOi'),
@@ -575,7 +608,85 @@ INSERT INTO `waiting_stats` (`id`, `queue_id`, `transaction_id`, `status_id`, `a
 (140, 807, 1, NULL, '2025-11-03 11:16:10', '2025-11-03 12:09:26', '2025-11-03 18:20:49', 3196, 22283),
 (141, 808, 14, NULL, '2025-11-03 18:20:49', '2025-11-03 18:28:19', '2025-11-03 18:28:58', 450, 39),
 (142, 809, 1, NULL, '2025-11-03 23:35:58', NULL, NULL, NULL, NULL),
-(143, 810, 1, NULL, '2025-11-03 23:54:04', NULL, NULL, NULL, NULL);
+(143, 810, 1, NULL, '2025-11-03 23:54:04', NULL, NULL, NULL, NULL),
+(144, 811, 1, NULL, '2025-11-04 12:55:34', '2025-11-04 13:03:38', '2025-11-04 13:03:40', 484, 2),
+(145, 812, 14, NULL, '2025-11-04 13:03:40', '2025-11-04 13:06:36', NULL, NULL, NULL),
+(146, 813, 1, NULL, '2025-11-04 13:12:36', '2025-11-04 13:13:36', '2025-11-04 13:13:38', 60, 2),
+(147, 814, 14, NULL, '2025-11-04 13:13:38', '2025-11-04 13:16:32', NULL, NULL, NULL),
+(148, 815, 1, NULL, '2025-11-04 13:23:19', '2025-11-04 13:24:07', NULL, NULL, NULL),
+(149, 816, 1, NULL, '2025-11-04 13:25:52', '2025-11-04 13:27:47', '2025-11-04 13:30:25', 115, 158),
+(150, 817, 1, NULL, '2025-11-04 13:26:08', NULL, NULL, NULL, NULL),
+(151, 818, 1, NULL, '2025-11-04 13:26:21', NULL, NULL, NULL, NULL),
+(152, 819, 14, NULL, '2025-11-04 13:30:25', NULL, NULL, NULL, NULL),
+(153, 820, 1, NULL, '2025-11-04 20:12:06', '2025-11-04 20:15:14', '2025-11-04 20:15:16', 188, 2),
+(154, 821, 14, NULL, '2025-11-04 20:15:16', '2025-11-04 20:16:46', NULL, NULL, NULL),
+(155, 822, 1, NULL, '2025-11-04 21:15:07', NULL, NULL, NULL, NULL),
+(156, 823, 1, NULL, '2025-11-05 08:10:08', NULL, NULL, NULL, NULL),
+(157, 824, 1, NULL, '2025-11-05 08:10:26', NULL, NULL, NULL, NULL),
+(158, 825, 1, NULL, '2025-11-05 08:10:52', NULL, NULL, NULL, NULL),
+(159, 826, 1, NULL, '2025-11-05 08:10:53', NULL, NULL, NULL, NULL),
+(160, 827, 1, NULL, '2025-11-05 08:25:12', NULL, NULL, NULL, NULL),
+(161, 828, 1, NULL, '2025-11-05 08:26:31', NULL, NULL, NULL, NULL),
+(162, 829, 1, NULL, '2025-11-05 08:27:43', NULL, NULL, NULL, NULL),
+(163, 830, 1, NULL, '2025-11-05 08:27:44', NULL, NULL, NULL, NULL),
+(164, 831, 1, NULL, '2025-11-05 08:27:45', NULL, NULL, NULL, NULL),
+(165, 832, 1, NULL, '2025-11-05 08:29:33', NULL, NULL, NULL, NULL),
+(166, 833, 1, NULL, '2025-11-05 08:33:30', NULL, NULL, NULL, NULL),
+(167, 834, 1, NULL, '2025-11-05 10:34:47', NULL, NULL, NULL, NULL),
+(168, 835, 1, NULL, '2025-11-05 10:39:45', '2025-11-05 10:40:42', '2025-11-05 10:40:46', 57, 4),
+(169, 836, 14, NULL, '2025-11-05 10:40:46', NULL, NULL, NULL, NULL),
+(170, 837, 1, NULL, '2025-11-05 11:03:24', NULL, NULL, NULL, NULL),
+(171, 838, 1, NULL, '2025-11-05 11:48:54', '2025-11-05 11:49:33', NULL, NULL, NULL),
+(172, 839, 1, NULL, '2025-11-05 11:52:16', '2025-11-05 11:53:02', NULL, NULL, NULL),
+(173, 840, 1, NULL, '2025-11-05 11:54:26', NULL, NULL, NULL, NULL),
+(174, 841, 1, NULL, '2025-11-05 11:56:07', '2025-11-05 11:57:05', NULL, NULL, NULL),
+(175, 842, 1, NULL, '2025-11-05 12:00:13', '2025-11-05 12:00:47', '2025-11-05 12:00:49', 34, 2),
+(176, 843, 14, NULL, '2025-11-05 12:00:49', NULL, NULL, NULL, NULL),
+(177, 844, 1, NULL, '2025-11-05 12:06:06', '2025-11-05 12:06:28', NULL, NULL, NULL),
+(178, 845, 1, NULL, '2025-11-05 12:08:48', '2025-11-05 12:09:08', NULL, NULL, NULL),
+(179, 846, 1, NULL, '2025-11-05 12:10:15', '2025-11-05 12:10:34', NULL, NULL, NULL),
+(180, 847, 1, NULL, '2025-11-05 12:11:32', '2025-11-05 12:11:52', NULL, NULL, NULL),
+(181, 848, 1, NULL, '2025-11-05 12:12:50', '2025-11-05 12:13:02', '2025-11-05 12:13:04', 12, 2),
+(182, 849, 14, NULL, '2025-11-05 12:13:04', NULL, NULL, NULL, NULL),
+(183, 850, 1, NULL, '2025-11-05 12:16:09', '2025-11-05 12:16:24', '2025-11-05 12:16:25', 15, 1),
+(184, 851, 14, NULL, '2025-11-05 12:16:25', NULL, NULL, NULL, NULL),
+(185, 852, 14, NULL, '2025-11-05 12:19:40', NULL, NULL, NULL, NULL),
+(186, 853, 1, NULL, '2025-11-05 12:19:49', NULL, NULL, NULL, NULL),
+(187, 854, 1, NULL, '2025-11-05 12:25:44', NULL, NULL, NULL, NULL),
+(188, 855, 14, NULL, '2025-11-05 12:25:52', NULL, NULL, NULL, NULL),
+(189, 856, 1, NULL, '2025-11-05 12:42:34', '2025-11-05 12:43:17', '2025-11-05 12:43:19', 43, 2),
+(190, 857, 14, NULL, '2025-11-05 12:43:19', NULL, NULL, NULL, NULL),
+(191, 858, 1, NULL, '2025-11-05 12:48:33', '2025-11-05 12:49:01', NULL, NULL, NULL),
+(192, 859, 14, NULL, '2025-11-05 12:51:04', NULL, NULL, NULL, NULL),
+(193, 860, 1, NULL, '2025-11-05 12:51:12', '2025-11-05 12:51:34', NULL, NULL, NULL),
+(194, 861, 1, NULL, '2025-11-05 12:53:30', '2025-11-05 12:53:44', '2025-11-05 12:53:45', 14, 1),
+(195, 862, 14, NULL, '2025-11-05 12:53:45', NULL, NULL, NULL, NULL),
+(196, 863, 1, NULL, '2025-11-05 12:55:13', '2025-11-05 12:55:25', '2025-11-05 12:55:26', 12, 1),
+(197, 864, 14, NULL, '2025-11-05 12:55:26', NULL, NULL, NULL, NULL),
+(198, 865, 1, NULL, '2025-11-05 12:56:26', '2025-11-05 12:56:37', '2025-11-05 12:56:38', 11, 1),
+(199, 866, 14, NULL, '2025-11-05 12:56:38', NULL, NULL, NULL, NULL),
+(200, 867, 1, NULL, '2025-11-05 12:59:15', '2025-11-05 12:59:43', NULL, NULL, NULL),
+(201, 868, 1, NULL, '2025-11-05 13:01:31', '2025-11-05 13:01:50', NULL, NULL, NULL),
+(202, 869, 1, NULL, '2025-11-05 13:03:28', '2025-11-05 13:03:48', NULL, NULL, NULL),
+(203, 870, 1, NULL, '2025-11-05 13:04:49', '2025-11-05 13:04:58', NULL, NULL, NULL),
+(204, 871, 1, NULL, '2025-11-05 13:06:17', '2025-11-05 13:06:26', NULL, NULL, NULL),
+(205, 872, 1, NULL, '2025-11-05 13:07:51', '2025-11-05 13:08:01', NULL, NULL, NULL),
+(206, 873, 1, NULL, '2025-11-05 13:11:17', '2025-11-05 13:11:30', '2025-11-05 13:11:31', 13, 1),
+(207, 874, 14, NULL, '2025-11-05 13:11:31', NULL, NULL, NULL, NULL),
+(208, 875, 14, NULL, '2025-11-05 13:14:43', NULL, NULL, NULL, NULL),
+(209, 876, 16, NULL, '2025-11-05 13:14:50', NULL, NULL, NULL, NULL),
+(210, 877, 16, NULL, '2025-11-05 13:15:01', NULL, NULL, NULL, NULL),
+(211, 880, 14, NULL, '2025-11-05 13:50:27', NULL, NULL, NULL, NULL),
+(212, 881, 14, NULL, '2025-11-05 13:51:41', NULL, NULL, NULL, NULL),
+(213, 883, 14, NULL, '2025-11-05 14:37:50', NULL, NULL, NULL, NULL),
+(214, 884, 14, NULL, '2025-11-05 14:49:14', NULL, NULL, NULL, NULL),
+(215, 885, 1, NULL, '2025-11-05 16:17:24', NULL, NULL, NULL, NULL),
+(216, 886, 14, NULL, '2025-11-05 16:26:54', NULL, NULL, NULL, NULL),
+(217, 887, 14, NULL, '2025-11-05 16:28:07', NULL, NULL, NULL, NULL),
+(218, 888, 14, NULL, '2025-11-05 16:28:22', NULL, NULL, NULL, NULL),
+(219, 889, 14, NULL, '2025-11-05 16:34:34', NULL, NULL, NULL, NULL),
+(220, 890, 14, NULL, '2025-11-05 16:34:42', NULL, NULL, NULL, NULL),
+(221, 891, 14, NULL, '2025-11-05 16:35:05', NULL, NULL, NULL, NULL);
 
 --
 -- Indexes for dumped tables
@@ -662,7 +773,7 @@ ALTER TABLE `file_uploads`
 -- AUTO_INCREMENT for table `queue_list`
 --
 ALTER TABLE `queue_list`
-  MODIFY `id` int(30) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=811;
+  MODIFY `id` int(30) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=892;
 
 --
 -- AUTO_INCREMENT for table `settings`
@@ -674,7 +785,7 @@ ALTER TABLE `settings`
 -- AUTO_INCREMENT for table `staff_statistics`
 --
 ALTER TABLE `staff_statistics`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=183;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=215;
 
 --
 -- AUTO_INCREMENT for table `status`
@@ -710,7 +821,7 @@ ALTER TABLE `user_permissions`
 -- AUTO_INCREMENT for table `waiting_stats`
 --
 ALTER TABLE `waiting_stats`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=144;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=222;
 
 --
 -- Constraints for dumped tables

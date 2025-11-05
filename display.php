@@ -19,9 +19,6 @@
 		background-size: cover;
 	}
 
-
-
-
 	a.btn.btn-sm.btn-success {
 		z-index: 99999;
 		position: fixed;
@@ -37,13 +34,27 @@
 	}
 
 	.company {
-		background-color: #fff;
-		margin-bottom: 50px;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		z-index: 99999;
+		position: absolute;
+		right:15px;
+		top:15px;
+		margin-bottom: 5px;
 	}
 
 	#company_image {
-		width: 150px;
-		height: 150px;
+
+		width: 100px;
+		height: 100px;
+		border-radius: 15px;
+	}
+
+	#company_title {
+		font-weight: 900;
+		font-size: 20px;
+		color: #1592d1;
 	}
 
 	#sec-name {
@@ -95,13 +106,16 @@ function nserving()
 }
 ?>
 <a href="index.php" class="btn btn-sm btn-success" style="background: #1592d1; color: #fff;"><i class="fa fa-home"></i> Home</a>
+
+<div class="company">
+	<p id="company_title"><?php echo isset($_SESSION['setting_name']) ?  $_SESSION['setting_name'] : 'Transaction Queuing System' ?></p>
+	<img src="<?php echo isset($_SESSION['setting_image']) ? 'admin/assets/img/' . $_SESSION['setting_image'] : 'admin/assets/img/logo.jpg' ?>" alt="" id="company_image">
+</div>
+
 <div class="left-side">
 	<div class="col-md-10">
 
 		<div class="card">
-			<div class="company">
-				<img src="<?php echo isset($_SESSION['setting_image']) ? 'admin/assets/img/' . $_SESSION['setting_image'] : 'admin/assets/img/logo.jpg' ?>" alt="" id="company_image">
-			</div>
 			<p id="sec-name"><?php echo strtoupper($tname) ?></p>
 			<p id="squeue"></p>
 		</div>

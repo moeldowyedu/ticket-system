@@ -17,86 +17,46 @@ class Queue
         $this->db->begin_transaction();
 
         try {
+            
+            $transfered=null;
+            $typeId=null;
+            if(isset($type_id))
+            {
+                $typeId=$type_id;
+                if(isset($to))
+                {
+                    $stmt1 = $this->db->prepare("SELECT id, name,numberFrom,numberTo FROM transactions WHERE type = ? LIMIT 1");
+                    $stmt1->bind_param("s", $to);
+                    $stmt1->execute();
+                    $result1 = $stmt1->get_result();
+                    if ($result1->num_rows > 0) {
+                        $transaction = $result1->fetch_assoc();
+                        $transaction_id = $transaction['id'];
+                        $transfered = $transaction['name'];
+                        $transaction_numberfrom=$transaction['numberFrom'];
+                        $transaction_numberto=$transaction['numberTo'];
+                    }
+                }
+            }
+
             $today = date("Y-m-d");
             
-            $stmt = $this->db->prepare("SELECT MAX(queue_no) as last_queue FROM queue_list WHERE DATE(created_timestamp) = ? FOR UPDATE");
-            $stmt->bind_param("s", $today);
+            $stmt = $this->db->prepare("SELECT MAX(queue_no) as last_queue FROM queue_list WHERE transaction_id = ? AND DATE(created_timestamp) = ? FOR UPDATE");
+            $stmt->bind_param("is",$transaction_id,$today);
             $stmt->execute();
             $result = $stmt->get_result();
             $last_queue = $result->fetch_assoc()['last_queue'];
             
             $stmt->close();
 
-            if ($last_queue === null) {
-                $queue_no = 1001;
+            if ($last_queue === null || $last_queue===$transaction_numberto) {
+                $queue_no = $transaction_numberfrom;
             } else {
                 $queue_no = $last_queue + 1;
             }
 
-            // If client provided a selection (A/B), try to store it in a dedicated `selection` column.
-            // Accept only 'A' or 'B' as valid selection values. Anything else will be ignored.
-            $selectionVal = (isset($selection) && in_array($selection, array('A','B'))) ? $selection : null;
-
-            // Check if `selection` column exists; if not, attempt to create it.
-            $selCol = $this->db->query("SHOW COLUMNS FROM queue_list LIKE 'selection'");
-            if (!($selCol && $selCol->num_rows > 0)) {
-                // Try to add the column (if permissions allow). Not critical if it fails.
-                @$this->db->query("ALTER TABLE queue_list ADD COLUMN selection VARCHAR(1) NULL DEFAULT NULL");
-                // re-check
-                $selCol = $this->db->query("SHOW COLUMNS FROM queue_list LIKE 'selection'");
-            }
-
-            // If selection provided, user requested storing A/B into `status` column as text (e.g. '-A-' or '-B-').
-            // NOTE: Changing `status` contents to text may break other parts of the app that expect numeric status (0/1).
-            if ($selectionVal !== null && $selCol && $selCol->num_rows > 0) {
-                // attempt to store both in `selection` column and also put marker into `status` as requested
-                $statusMarker = ($selectionVal === 'A') ? '-A-' : '-B-';
-
-                // Ensure status column exists; if it's numeric MySQL will coerce, but try to modify to varchar to allow text
-                $statusCol = $this->db->query("SHOW COLUMNS FROM queue_list LIKE 'status'");
-                $shouldModify = false;
-                if ($statusCol && $statusCol->num_rows > 0) {
-                    $stype = $statusCol->fetch_assoc()['Type'];
-                    if (stripos($stype, 'int') !== false || stripos($stype, 'tinyint') !== false) {
-                        $shouldModify = true;
-                    }
-                }
-                if ($shouldModify) {
-                    // try to alter to varchar(10); suppress warnings
-                    @$this->db->query("ALTER TABLE queue_list MODIFY status VARCHAR(10) DEFAULT NULL");
-                }
-
-                if ($selCol && $selCol->num_rows > 0) {
-                    $insert_stmt = $this->db->prepare("INSERT INTO queue_list (transaction_id, queue_no, selection, status) VALUES (?, ?, ?, ?)");
-                    $insert_stmt->bind_param("iiss", $transaction_id, $queue_no, $selectionVal, $statusMarker);
-                } else {
-                    // if no selection column, still insert status marker
-                    $insert_stmt = $this->db->prepare("INSERT INTO queue_list (transaction_id, queue_no, status) VALUES (?, ?, ?)");
-                    $insert_stmt->bind_param("iss", $transaction_id, $queue_no, $statusMarker);
-                }
-            } else {
-                // No selection provided. Attempt to insert an empty status string when the
-                // `status` column supports textual values. If `status` is numeric (int/tinyint),
-                // fall back to inserting without specifying status (preserve existing behavior).
-                $statusCol = $this->db->query("SHOW COLUMNS FROM queue_list LIKE 'status'");
-                $useEmptyStatus = false;
-                if ($statusCol && $statusCol->num_rows > 0) {
-                    $stype = $statusCol->fetch_assoc()['Type'];
-                    if (stripos($stype, 'int') === false && stripos($stype, 'tinyint') === false) {
-                        $useEmptyStatus = true;
-                    }
-                }
-
-                if ($useEmptyStatus) {
-                    // insert explicit empty string into status
-                    $emptyStatus = '';
-                    $insert_stmt = $this->db->prepare("INSERT INTO queue_list (transaction_id, queue_no, status) VALUES (?, ?, ?)");
-                    $insert_stmt->bind_param("iss", $transaction_id, $queue_no, $emptyStatus);
-                } else {
-                    $insert_stmt = $this->db->prepare("INSERT INTO queue_list (transaction_id, queue_no) VALUES (?, ?)");
-                    $insert_stmt->bind_param("is", $transaction_id, $queue_no);
-                }
-            }
+            $insert_stmt = $this->db->prepare("INSERT INTO queue_list (transaction_id, queue_no,type_id,transfered) VALUES (?,?,?,?)");
+            $insert_stmt->bind_param("isis", $transaction_id, $queue_no,$typeId,$transfered);
 
             if ($insert_stmt->execute()) {
                 $queue_id = $this->db->insert_id;
@@ -501,7 +461,7 @@ class Queue
         $trans = '';
 
         if ($to != null) {
-            $stmt1 = $this->db->prepare("SELECT id, name FROM transactions WHERE type = ? LIMIT 1");
+            $stmt1 = $this->db->prepare("SELECT id, name,numberFrom,numberTo FROM transactions WHERE type = ? LIMIT 1");
             $stmt1->bind_param("s", $to);
             $stmt1->execute();
             $result1 = $stmt1->get_result();
@@ -510,6 +470,21 @@ class Queue
                 $transaction = $result1->fetch_assoc();
                 $tid = $transaction['id'];
                 $trans = $transaction['name'];
+
+                //----------------select-----------------
+                $today = date("Y-m-d");
+            
+                $stmt = $this->db->prepare("SELECT MAX(queue_no) as last_queue FROM queue_list WHERE transaction_id = ? AND DATE(created_timestamp) = ? FOR UPDATE");
+                $stmt->bind_param("is",$tid,$today);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $last_queue = $result->fetch_assoc()['last_queue'];
+                if ($last_queue === null || $last_queue===$transaction['numberTo']) {
+                    $qnumber = $transaction['numberFrom'];
+                } else {
+                    $qnumber = $last_queue + 1;
+                }
+
             } else {
                 return 0;
             }
@@ -576,10 +551,7 @@ class Queue
                     'window_id'          => $row['window_id'],
                     'queue_no'           => $row['queue_no'],
                     'type_id'            => $type,
-                    'created_timestamp'  => $row['created_timestamp'],
-                    // include any stored selection or raw status for display on staff UI
-                    'selection'          => isset($row['selection']) ? $row['selection'] : null,
-                    'status_raw'         => isset($row['status']) ? $row['status'] : null
+                    'created_timestamp'  => $row['created_timestamp']
                 ];
             }
         }
@@ -669,10 +641,7 @@ class Queue
                     'type' => $statusTypes[$row['type_id']] ?? null,
                     'type_color' => $statusColors[$row['type_id']] ?? "#ffffff",
                     'created_timestamp' => $row['created_timestamp'],
-                    'waiting_time' => $this->secondsToArabicText(time() - strtotime($row['created_timestamp'])),
-                    // expose selection and raw status so UI can show -A- / -B- markers when present
-                    'selection' => isset($row['selection']) ? $row['selection'] : null,
-                    'status_raw' => isset($row['status']) ? $row['status'] : null
+                    'waiting_time' => $this->secondsToArabicText(time() - strtotime($row['created_timestamp']))
                 );
             }
         }
