@@ -86,29 +86,11 @@ if ($qry->num_rows > 0) {
 
         function queueNow() {
             var period = <?php echo isset($meta['period']) ? (int)$meta['period'] : 30; ?>;
+            // Immediate next behavior: do not disable the Next button or show a countdown.
+            // Previously the button was disabled for `period` seconds. We intentionally
+            // skip that to allow calling the next number immediately for all users.
             var nextBtn = $('#nextBtn');
             var timerSpan = nextBtn.find('.timer');
-
-            nextBtn.prop('disabled', true);
-            timerSpan.show();
-
-            var secondsLeft = period;
-            updateTimerDisplay();
-
-            var timerInterval = setInterval(function() {
-                secondsLeft--;
-                updateTimerDisplay();
-
-                if (secondsLeft <= 0) {
-                    clearInterval(timerInterval);
-                    nextBtn.prop('disabled', false);
-                    timerSpan.hide().text('');
-                }
-            }, 1000);
-
-            function updateTimerDisplay() {
-                timerSpan.text(' (' + secondsLeft + 's)');
-            }
 
             var qid = $('#queue_id').val();
             var typeId = $('#queue_id').attr('data-typeid');
